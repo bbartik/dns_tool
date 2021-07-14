@@ -1,5 +1,6 @@
 ## Usage
 
+```
 $ python dns_tool.py 
 dnspython.org resolved to 52.218.120.132 by 8.8.8.8 in 0.11101809999672696 seconds
 dnspython.org resolved to 52.218.36.148 by 8.8.8.8 in 0.07649729997501709 seconds
@@ -10,6 +11,7 @@ dnspython.org resolved to 52.218.0.172 by 8.8.8.8 in 0.1233955999778118 seconds
 dnspython.org resolved to 52.218.57.108 by 8.8.8.8 in 0.07923239999217913 seconds
 dnspython.org resolved to 52.218.57.108 by 8.8.8.8 in 0.05297610000707209 seconds
 dnspython.org resolved to 52.218.80.114 by 8.8.8.8 in 0.06605150000541471 seconds
+```
 
 ## To-do
 
