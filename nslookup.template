@@ -1,0 +1,14 @@
+Value Key SERVER (.*)
+Value ADDRESS (.*)
+Value NAME (.*)
+Value List ANSWER_ADDRESSES (.*)
+
+Start
+  ^Server:(\s+)${SERVER}
+  ^Address:(\s+)${ADDRESS}#
+  ^Non-authoritative answer:
+  ^Name:(\s+)${NAME}
+  ^Address:(\s+)${ANSWER_ADDRESSES}
+  ^(\s+)${ANSWER_ADDRESSES} -> Record
+
+End
