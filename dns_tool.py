@@ -1,22 +1,50 @@
+import datetime
 import time
 import subprocess
 import textfsm
+import pandas as pd
+import typer
 
+import pdb
 
-
-def resolve_name_subprocess():
-    """ Resolve DNS name a bunch of times and time the query"""
+def main(host: str, dns_server: str, counter: int):
+    """ Resolve DNS name set number of times and calculate delay stats"""
     
-    start_time = time.perf_counter()
-    answer = subprocess.check_output(["nslookup", "dnspython.org", "8.8.8.8"]).decode("utf-8")
-    #pdb.set_trace()
-    end_time = time.perf_counter()
+    # initialize the dns data list
+    dns_data = []
 
-    with open("nslookup.template", "r") as template:
-        re_table = textfsm.TextFSM(template)
-        data = re_table.ParseText(answer)[0]
-    qry_time = end_time - start_time
-    print(f'{data[2]} resolved to {data[3][0]} by {data[1]} in {qry_time} seconds')
+    # main loop
+    for x in range(1, counter):
+        #intialize the dns dataset entry
+        dns_entry = {}
+        start_time = pd.Timestamp.now()
+        answer = subprocess.check_output(["nslookup", host, dns_server]).decode("utf-8")
+        end_time = pd.Timestamp.now()
+        qry_delay = end_time - start_time
+
+        # parse the nslookup output using custom textfsm template
+        with open("nslookup.template", "r") as template:
+            re_table = textfsm.TextFSM(template)
+            data = re_table.ParseText(answer)[0]
+
+        # populate dns dataset entry and then append to full list
+        dns_entry.update({
+            "dns_qry_time": pd.Timestamp.now(),
+            "dns_qry_name": data[2],
+            "dns_srv_addr": data[1],
+            "dns_answer": data[3][0],
+            "dns_delay": qry_delay,
+        })
+        dns_data.append(dns_entry)
+        print(dns_entry)
+        
+        # set time between commands to 1 sec
+        time.sleep(1)
+
+    df = pd.DataFrame(dns_data)
+    df.set_index(['dns_qry_time'])
+    print(f"Mean time is {df['dns_delay'].mean()}")
+    print(f"Max time is {df['dns_delay'].max()}")
 
     return None
 
@@ -24,10 +52,4 @@ def resolve_name_subprocess():
 
 if __name__ == "__main__":
 
-    counter = 10
-    for x in range(1, counter):
-        resolve_name_subprocess()
-        #resolve_name()
-        time.sleep(1)
-
-        
+    typer.run(main)
