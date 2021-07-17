@@ -20,24 +20,27 @@ def main(host: str, dns_server: str, counter: int):
         start_time = pd.Timestamp.now()
         answer = subprocess.check_output(["nslookup", host, dns_server]).decode("utf-8")
         end_time = pd.Timestamp.now()
-        qry_delay = end_time - start_time
-
+        qry_delay = (end_time - start_time).total_seconds()
+        
         # parse the nslookup output using custom textfsm template
         with open("nslookup.template", "r") as template:
             re_table = textfsm.TextFSM(template)
             data = re_table.ParseText(answer)[0]
 
         # populate dns dataset entry and then append to full list
+        dns_qry_name = data[2]
+        dns_srv_addr = data[1]
+        dns_answer = data[3][0]
         dns_entry.update({
             "dns_qry_time": pd.Timestamp.now(),
-            "dns_qry_name": data[2],
-            "dns_srv_addr": data[1],
-            "dns_answer": data[3][0],
+            "dns_qry_name": dns_qry_name,
+            "dns_srv_addr": dns_srv_addr,
+            "dns_answer": dns_answer,
             "dns_delay": qry_delay,
         })
         dns_data.append(dns_entry)
-        print(dns_entry)
-        
+        print(f'{dns_qry_name} resolved to {dns_answer} by {dns_srv_addr} in {qry_delay} seconds')
+
         # set time between commands to 1 sec
         time.sleep(1)
 
